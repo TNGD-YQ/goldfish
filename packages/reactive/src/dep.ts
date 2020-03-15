@@ -79,23 +79,26 @@ export class DepList {
         return;
       }
 
-      if (!shouldBatch) {
+      if (!shouldBatch || options.isArray) {
         cb(n, o, options);
       } else {
         if (isDone) {
           return;
         }
 
-        removeListeners.forEach(fn => fn());
         isDone = true;
-        removeListeners.splice(0, removeListeners.length);
         Promise.resolve().then(() => cb(n, o, options));
       }
     };
     this.list.forEach((dep) => {
       removeListeners.push(dep.addListener(checker));
     });
-    return removeListeners;
+    return [
+      () => {
+        removeListeners.forEach(fn => fn());
+        removeListeners.splice(0, removeListeners.length);
+      },
+    ];
   }
 }
 
@@ -109,12 +112,22 @@ export interface IErrorCallback {
   (error: any): void;
 }
 
+/**
+ * Collect dependencies in `fn`.
+ *
+ * @param fn
+ * @param errorCb
+ */
 export function call(fn: Function, errorCb?: IErrorCallback) {
   stack.push(new DepList());
   try {
     fn();
   } catch (error) {
-    errorCb && errorCb(error);
+    if (errorCb) {
+      errorCb(error);
+    } else {
+      throw error;
+    };
   } finally {
     stack.pop();
   }

@@ -1,6 +1,7 @@
 import { call, getCurrent, IErrorCallback, ChangeOptions } from './dep';
 import { isArray } from './utils';
 import { isObject } from '@goldfishjs/utils';
+import isRaw from './isRaw';
 
 export type Unwatch = () => void;
 export type IWatchCallback<N, O = any> =
@@ -24,7 +25,7 @@ class Watcher<R> {
 
   private isFirstTime = true;
 
-  private removeListenersGroup: Function[][] = [];
+  private removeListeners: Function[] = [];
 
   constructor(
     fn: IWatchExpressionFn<R>,
@@ -40,14 +41,20 @@ class Watcher<R> {
 
   public stop() {
     this.isStopped = true;
-    this.removeListenersGroup.forEach((group) => {
-      group.forEach(fn => fn());
-    });
-    this.removeListenersGroup = [];
+    this.callRemoveListeners();
+  }
+
+  private callRemoveListeners() {
+    this.removeListeners.forEach(r => r());
+    this.removeListeners.splice(0, this.removeListeners.length);
   }
 
   // 递归访问一下，方便搜集依赖
   private deepVisit(obj: any) {
+    if (obj && isRaw(obj)) {
+      return;
+    }
+
     if (isObject(obj)) {
       for (const key in obj) {
         if (!Object.prototype.hasOwnProperty.call(obj, key)) {
@@ -72,8 +79,9 @@ class Watcher<R> {
         if (this.options.deep) {
           this.deepVisit(result);
         }
-        this.removeListenersGroup.push(
-          getCurrent().addChangeListener((n: any, o: any, options: ChangeOptions) => {
+        this.removeListeners.push(
+          ...getCurrent().addChangeListener((n: any, o: any, options: ChangeOptions) => {
+            this.callRemoveListeners();
             if (this.isStopped) {
               return;
             }

@@ -1,0 +1,12 @@
+{
+  "extends": "../src/tsconfig",
+  "compilerOptions": {
+    "lib": [
+      "es2015",
+      "dom"
+    ],
+    "allowJs": true,
+    "module": "es2015",
+    "target": "es5"
+  }
+}
