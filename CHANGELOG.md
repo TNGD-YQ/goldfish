@@ -1,8 +1,34 @@
-## 1.1.1
+## 1.1.4
+
+### 💡 Main Changes
+
+- [+] **@goldfishjs/utils:**
+  - visit the object deeply and handle the circular reference.
+
+### 🐞 Bug Fixes
+
+- [^] **@goldfishjs/reactive:**
+  - use `deepVisit()` to handle circular objects.
+
+## 1.1.3
+
+### 🐞 Bug Fixes
+
+- [^] **@goldfishjs/react:**
+  - use keys to update state.
+  - get computed values in the `watchDeep()` callback.
+
+## 1.1.2
 
 ### 🐞 Bug Fixes
 
 - [^] **@goldfishjs/react:** keep `this` of the component function in `observer`.
+
+### 💡 Main Changes
+
+- [+] **@goldfish/react:**
+  - add `useMount()` and `useUnmount()`.
+  - add `useSetup()` to support the strange compiler in Taro.
 
 ## 1.1.0
 
